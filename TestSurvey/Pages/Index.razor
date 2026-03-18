@@ -1,12 +1,15 @@
 ﻿@page "/"
 @using SurveyBuilder.Components
 @using SurveyBuilder.Models
+@using System.Text.Json
 
 <PageTitle>Index</PageTitle>
 
+<SurveyBuilderComponent Title="Customer Feedback" Questions="_questions" OnSurveyReady="HandleSurveyReady" />
+
 @if (_questions is null)
 {
-    <SurveyBuilderComponent Title="Customer Feedback" OnSurveyReady="HandleSurveyReady" />
+    
 }
 else if (!_showResults)
 {
@@ -30,11 +33,49 @@ else
     </div>
 }
 
+<div>
+    @{
+        string myResult = JsonSerializer.Serialize(_questions);
+        <span>@myResult</span>
+    }
+</div>
+
 @code {
     private List<SurveyQuestion>? _questions;
     private List<SurveyResponse>? _responses;
     private string _surveyTitle = "";
     private bool _showResults;
+
+    override protected void OnInitialized()
+    {
+        _questions = new List<SurveyQuestion>
+        {
+            new SurveyQuestion
+            {
+                Id = Guid.NewGuid(),
+                Text = "How satisfied are you with our product?",
+                Type = QuestionType.Rating,
+                IsRequired = true,
+                MaxRating = 5
+            },
+            new SurveyQuestion
+            {
+                Id = Guid.NewGuid(),
+                Text = "What features would you like to see in the future?",
+                Type = QuestionType.Text,
+                IsRequired = false,
+                MaxLength = 200
+            },
+            new SurveyQuestion
+            {
+                Id = Guid.NewGuid(),
+                Text = "Which of the following best describes you?",
+                Type = QuestionType.MultipleChoice,
+                IsRequired = true,
+                Options = new List<string> { "New Customer", "Returning Customer", "Just Browsing" }
+            }
+        };
+    }
 
     private void HandleSurveyReady(List<SurveyQuestion> questions)
     {

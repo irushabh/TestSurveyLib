@@ -22,6 +22,12 @@
         <label class="checkbox-label">
             <input type="checkbox" @bind="Question.IsRequired" /> Required
         </label>
+        @if (Question.Type == QuestionType.Text)
+        {
+            <label class="checkbox-label">
+                <input type="number" @bind="Question.MaxLength" /> Max Length
+            </label>
+        }        
     </div>
 
     @if (Question.Type == QuestionType.MultipleChoice || Question.Type == QuestionType.Checkbox || Question.Type == QuestionType.Dropdown)

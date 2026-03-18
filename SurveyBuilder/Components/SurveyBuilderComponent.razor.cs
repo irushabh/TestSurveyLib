@@ -13,33 +13,32 @@ namespace SurveyBuilder.Components
     {
         [Parameter] public string Title { get; set; } = "My Survey";
         [Parameter] public EventCallback<List<SurveyQuestion>> OnSurveyReady { get; set; }
-
-        private List<SurveyQuestion> _questions = new();
+        [Parameter] public List<SurveyQuestion> Questions { get; set; }  = new();
         private string _surveyTitle = "My Survey";
 
         protected override void OnParametersSet() => _surveyTitle = Title;
 
         private void AddQuestion() =>
-            _questions.Add(new SurveyQuestion { Text = $"Question {_questions.Count + 1}" });
+            Questions.Add(new SurveyQuestion { Text = $"Question {Questions.Count + 1}" });
 
-        private void RemoveQuestion(SurveyQuestion q) => _questions.Remove(q);
+        private void RemoveQuestion(SurveyQuestion q) => Questions.Remove(q);
 
         private void MoveUp(SurveyQuestion q)
         {
-            int i = _questions.IndexOf(q);
-            if (i > 0) (_questions[i], _questions[i - 1]) = (_questions[i - 1], _questions[i]);
+            int i = Questions.IndexOf(q);
+            if (i > 0) (Questions[i], Questions[i - 1]) = (Questions[i - 1], Questions[i]);
         }
 
         private void MoveDown(SurveyQuestion q)
         {
-            int i = _questions.IndexOf(q);
-            if (i < _questions.Count - 1) (_questions[i], _questions[i + 1]) = (_questions[i + 1], _questions[i]);
+            int i = Questions.IndexOf(q);
+            if (i < Questions.Count - 1) (Questions[i], Questions[i + 1]) = (Questions[i + 1], Questions[i]);
         }
 
         private async Task Publish()
         {
-            if (_questions.Any(q => string.IsNullOrWhiteSpace(q.Text))) return;
-            await OnSurveyReady.InvokeAsync(_questions);
+            if (Questions.Any(q => string.IsNullOrWhiteSpace(q.Text))) return;
+            await OnSurveyReady.InvokeAsync(Questions);
         }
     }
 }

@@ -7,14 +7,14 @@
     </div>
 
     <div class="questions-container">
-        @if (!_questions.Any())
+        @if (!Questions.Any())
         {
             <div class="empty-state">
                 <p>No questions yet. Click <strong>Add Question</strong> to get started.</p>
             </div>
         }
 
-        @foreach (var q in _questions)
+        @foreach (var q in Questions)
         {
             <div class="question-wrapper">
                 <div class="reorder-controls">
@@ -32,7 +32,7 @@
         <button class="btn secondary" @onclick="AddQuestion">+ Add Question</button>
         <button class="btn primary"
                 @onclick="Publish"
-                disabled="@(!_questions.Any())">
+                disabled="@(!Questions.Any())">
             Publish Survey ▶
         </button>
     </div>
