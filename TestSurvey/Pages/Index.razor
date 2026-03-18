@@ -35,9 +35,10 @@ else
 
 <div>
     @{
-        string myResult = JsonSerializer.Serialize(_questions);
-        <span>@myResult</span>
+        jsonString = JsonSerializer.Serialize(_questions);
+        <span>@jsonString</span>
     }
+    <input type="button" class="btn btn-primary" value="Generate Class" @onclick="@GenerateClassFromString" />
 </div>
 
 @code {
@@ -45,6 +46,7 @@ else
     private List<SurveyResponse>? _responses;
     private string _surveyTitle = "";
     private bool _showResults;
+    private string jsonString = "";
 
     override protected void OnInitialized()
     {
@@ -75,6 +77,12 @@ else
                 Options = new List<string> { "New Customer", "Returning Customer", "Just Browsing" }
             }
         };
+    }
+
+    public void GenerateClassFromString()
+    {
+        List<SurveyQuestion> _ques = JsonSerializer.Deserialize<List<SurveyQuestion>>(jsonString);
+
     }
 
     private void HandleSurveyReady(List<SurveyQuestion> questions)
