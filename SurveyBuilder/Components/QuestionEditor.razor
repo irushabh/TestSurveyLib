@@ -1,0 +1,57 @@
+﻿@using global::SurveyBuilder.Models
+
+<div class="question-card">
+    <div class="question-header">
+        <input class="question-title-input"
+               @bind="Question.Text"
+               @bind:event="oninput"
+               placeholder="Enter question text..." />
+        <button class="btn-icon danger" @onclick="OnRemove">✕</button>
+    </div>
+
+    <div class="question-meta">
+        <label>
+            Type:
+            <select @onchange="OnTypeChanged">
+                @foreach (var qt in Enum.GetValues<QuestionType>())
+                {
+                    <option value="@qt" selected="@(Question.Type == qt)">@qt</option>
+                }
+            </select>
+        </label>
+        <label class="checkbox-label">
+            <input type="checkbox" @bind="Question.IsRequired" /> Required
+        </label>
+    </div>
+
+    @if (Question.Type == QuestionType.MultipleChoice || Question.Type == QuestionType.Checkbox || Question.Type == QuestionType.Dropdown)
+    {
+        <div class="options-section">
+            <strong>Options</strong>
+            <ul class="options-list">
+                @foreach (var opt in Question.Options)
+                {
+                    <li>
+                        <span>@opt</span>
+                        <button class="btn-icon danger small" @onclick="() => RemoveOption(opt)">✕</button>
+                    </li>
+                }
+            </ul>
+            <div class="add-option">
+                <input @bind="_newOption"
+                       @onkeydown="HandleKeyDown"
+                       maxlength="50"
+                       placeholder="New option..." />
+                <button class="btn secondary" @onclick="AddOption">Add</button>
+            </div>
+        </div>
+    }
+
+    @if (Question.Type == QuestionType.Rating)
+    {
+        <label>
+            Max Stars:
+            <input type="number" min="3" max="10" @bind="Question.MaxRating" style="width:60px" />
+        </label>
+    }
+</div>

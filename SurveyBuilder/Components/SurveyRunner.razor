@@ -1,0 +1,134 @@
+﻿@using global::SurveyBuilder.Models
+
+<div class="survey-runner">
+    @if (_submitted)
+    {
+        <div class="thank-you">
+            <div class="check-icon">✓</div>
+            <h2>Thank you!</h2>
+            <p>Your response has been recorded.</p>
+        </div>
+    }
+    else
+    {
+        <div class="runner-header">
+            <h2>@SurveyTitle</h2>
+            <p class="question-count">@Questions.Count question@(Questions.Count != 1 ? "s" : "")</p>
+        </div>
+
+        <div class="questions-list">
+            @foreach (var (q, i) in Questions.Select((q, i) => (q, i)))
+            {
+                <div class="runner-question">
+                    <p class="question-label">
+                        <span class="q-num">@(i + 1).</span>
+                        @q.Text
+                        @if (q.IsRequired)
+                        {
+                            <span class="required">*</span>
+                        }
+                    </p>
+
+                    @switch (q.Type)
+                    {
+                        case QuestionType.Text:
+                            <textarea rows="3"
+                                      placeholder="Your answer..."
+                                      maxlength="@q.MaxLength"
+                                      @onchange="e => SetText(q.Id, e)"></textarea>
+                                      <span class="text-danger">
+                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
+                                      </span>
+                            break;
+
+                        case QuestionType.MultipleChoice:
+                            @foreach (var opt in q.Options)
+                            {
+                                <label class="radio-label">
+                                    <input type="radio"
+                                           name="@q.Id"
+                                           value="@opt"
+                                           @onchange="e => SetSingle(q.Id, e)" />
+                                    @opt
+                                </label>
+                            }
+                            <span class="text-danger">
+                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
+                            </span>
+                            break;
+
+                        case QuestionType.Dropdown:
+                            <select @onchange="e => SetSingle(q.Id, e)" class="form-select">
+                                <option value="">
+                                    [Not Selected]
+                                </option>
+                                @foreach (var opt in q.Options)
+                                {
+                                    <option value="@opt">
+                                        @opt
+                                    </option>
+                                }
+                            </select>        
+                            <span class="text-danger">
+                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
+                            </span>
+                            break;
+
+                        case QuestionType.Checkbox:
+                            @foreach (var opt in q.Options)
+                            {
+                                <label class="checkbox-label">
+                                    <input type="checkbox"
+                                           @onchange="e => ToggleCheckbox(q.Id, opt, e)" />
+                                    @opt
+                                </label>
+                            }
+                            <span class="text-danger">
+                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
+                            </span>
+                            break;
+
+                        case QuestionType.Rating:
+                            <div class="star-rating">
+                                @for (int s = 1; s <= q.MaxRating; s++)
+                                {
+                                    var star = s;
+                                    <button class="star @(_responses[q.Id].RatingAnswer >= star ? "active" : "")"
+                                            @onclick="() => SetRating(q.Id, star)">
+                                        ★
+                                    </button>
+                                }
+                            </div>
+                            <span class="text-danger">
+                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
+                            </span>
+                            break;
+
+                        case QuestionType.YesNo:
+                            <div class="yesno-group">
+                                <button class="btn-yesno @(_responses[q.Id].YesNoAnswer == true ? "active" : "")"
+                                        @onclick="() => SetYesNo(q.Id, true)">
+                                    Yes
+                                </button>
+                                <button class="btn-yesno @(_responses[q.Id].YesNoAnswer == false ? "active" : "")"
+                                        @onclick="() => SetYesNo(q.Id, false)">
+                                    No
+                                </button>
+                            </div>
+                            <span class="text-danger">
+                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
+                            </span>
+                            break;
+                    }
+                </div>
+            }
+        </div>
+
+        @if (_validationError is not null)
+        {
+            <p class="validation-error">⚠ @_validationError</p>
+        }
+
+        <button class="btn primary full-width" @onclick="Submit">Submit Survey</button>
+    }
+</div>

@@ -1,0 +1,63 @@
+﻿@page "/"
+@using SurveyBuilder.Components
+@using SurveyBuilder.Models
+
+<PageTitle>Index</PageTitle>
+
+@if (_questions is null)
+{
+    <SurveyBuilderComponent Title="Customer Feedback" OnSurveyReady="HandleSurveyReady" />
+}
+else if (!_showResults)
+{
+    <SurveyRunner SurveyTitle="@_surveyTitle"
+                  Questions="_questions"
+                  OnSubmit="HandleSubmit" />
+}
+else
+{
+    <div class="results-panel">
+        <h2>📊 Submission Received</h2>
+        @foreach (var r in _responses!)
+        {
+            var q = _questions.First(x => x.Id == r.QuestionId);
+            <div class="result-item">
+                <strong>@q.Text</strong>
+                <p>@GetAnswerText(r)</p>
+            </div>
+        }
+        <button class="btn secondary" @onclick="Reset">Start Over</button>
+    </div>
+}
+
+@code {
+    private List<SurveyQuestion>? _questions;
+    private List<SurveyResponse>? _responses;
+    private string _surveyTitle = "";
+    private bool _showResults;
+
+    private void HandleSurveyReady(List<SurveyQuestion> questions)
+    {
+        _questions = questions;
+        _surveyTitle = "Customer Feedback";
+    }
+
+    private void HandleSubmit(List<SurveyResponse> responses)
+    {
+        _responses = responses;
+        _showResults = true;
+    }
+
+    private void Reset()
+    {
+        _questions = null;
+        _responses = null;
+        _showResults = false;
+    }
+
+    private string GetAnswerText(SurveyResponse r) =>
+        r.TextAnswer is not null ? r.TextAnswer :
+        r.SelectedOptions.Any() ? string.Join(", ", r.SelectedOptions) :
+        r.RatingAnswer.HasValue ? $"{r.RatingAnswer} ★" :
+        r.YesNoAnswer.HasValue ? (r.YesNoAnswer.Value ? "Yes" : "No") : "—";
+}

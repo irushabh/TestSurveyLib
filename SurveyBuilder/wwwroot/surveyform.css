@@ -1,0 +1,430 @@
+﻿/* wwwroot/survey.css — include in index.html or App.razor */
+
+/* ---- Base ---- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f4f6fb;
+    color: #1e293b;
+}
+
+/* ---- Shared Buttons ---- */
+.btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+}
+
+    .btn:hover {
+        opacity: .85;
+        transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn.primary {
+        background: #4f46e5;
+        color: #fff;
+    }
+
+    .btn.secondary {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .btn.full-width {
+        width: 100%;
+        margin-top: 20px;
+        padding: 12px;
+        font-size: 16px;
+    }
+
+.btn-icon {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s;
+}
+
+    .btn-icon:hover {
+        background: #f1f5f9;
+    }
+
+    .btn-icon.danger:hover {
+        background: #fee2e2;
+        border-color: #fca5a5;
+        color: #dc2626;
+    }
+
+    .btn-icon.small {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+
+/* ---- Survey Builder ---- */
+.survey-builder {
+    max-width: 780px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    padding: 32px;
+}
+
+.builder-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 20px;
+}
+
+.survey-title-input {
+    font-size: 22px;
+    font-weight: 700;
+    border: none;
+    border-bottom: 2px dashed #cbd5e1;
+    outline: none;
+    padding: 4px 0;
+    color: #1e293b;
+    background: transparent;
+    width: 100%;
+}
+
+    .survey-title-input:focus {
+        border-color: #4f46e5;
+    }
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+    border: 2px dashed #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.question-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.reorder-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 10px;
+}
+
+.builder-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    border-top: 2px solid #e2e8f0;
+    padding-top: 20px;
+}
+
+/* ---- Question Editor Card ---- */
+.question-card {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.question-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.question-title-input {
+    flex: 1;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-bottom: 2px solid #cbd5e1;
+    padding: 4px 0;
+    background: transparent;
+    outline: none;
+    color: #1e293b;
+}
+
+    .question-title-input:focus {
+        border-color: #4f46e5;
+    }
+
+.question-meta {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    font-size: 14px;
+}
+
+    .question-meta select {
+        margin-left: 6px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        padding: 3px 6px;
+        font-size: 13px;
+    }
+
+.options-section {
+    font-size: 14px;
+}
+
+.options-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+    .options-list li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 5px 10px;
+    }
+
+        .options-list li span {
+            flex: 1;
+        }
+
+.add-option {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+    .add-option input {
+        flex: 1;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 13px;
+        outline: none;
+    }
+
+        .add-option input:focus {
+            border-color: #4f46e5;
+        }
+
+/* ---- Survey Runner ---- */
+.survey-runner {
+    max-width: 620px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    padding: 32px;
+}
+
+.runner-header {
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+    .runner-header h2 {
+        font-size: 24px;
+    }
+
+.question-count {
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.runner-question {
+    padding: 20px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+    .runner-question:last-child {
+        border-bottom: none;
+    }
+
+.question-label {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 6px;
+}
+
+.q-num {
+    color: #4f46e5;
+}
+
+.required {
+    color: #ef4444;
+}
+
+textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+}
+
+    textarea:focus {
+        border-color: #4f46e5;
+    }
+
+.radio-label, .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+/* Star Rating */
+.star-rating {
+    display: flex;
+    gap: 4px;
+}
+
+.star {
+    background: none;
+    border: none;
+    font-size: 30px;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: color .15s, transform .1s;
+    padding: 0;
+}
+
+    .star:hover, .star.active {
+        color: #f59e0b;
+    }
+
+    .star:hover {
+        transform: scale(1.15);
+    }
+
+/* Yes/No */
+.yesno-group {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-yesno {
+    padding: 10px 28px;
+    border-radius: 10px;
+    border: 2px solid #cbd5e1;
+    background: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+}
+
+    .btn-yesno:hover {
+        border-color: #4f46e5;
+        color: #4f46e5;
+    }
+
+    .btn-yesno.active {
+        background: #4f46e5;
+        border-color: #4f46e5;
+        color: #fff;
+    }
+
+/* Validation */
+.validation-error {
+    color: #dc2626;
+    font-size: 14px;
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: #fef2f2;
+    border-radius: 8px;
+    border: 1px solid #fca5a5;
+}
+
+/* Thank You */
+.thank-you {
+    text-align: center;
+    padding: 48px 0;
+}
+
+.check-icon {
+    width: 72px;
+    height: 72px;
+    background: #4f46e5;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.thank-you h2 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.thank-you p {
+    color: #64748b;
+}
+
+/* Results Panel */
+.results-panel {
+    max-width: 620px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    padding: 32px;
+}
+
+.result-item {
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+    .result-item p {
+        color: #475569;
+        margin-top: 4px;
+        font-size: 15px;
+    }

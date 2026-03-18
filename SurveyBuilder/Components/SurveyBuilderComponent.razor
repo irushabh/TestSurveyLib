@@ -1,0 +1,39 @@
+﻿<div class="survey-builder">
+    <div class="builder-header">
+        <h2>🛠 Survey Builder</h2>
+        <input class="survey-title-input"
+               @bind="_surveyTitle"
+               placeholder="Survey title..." />
+    </div>
+
+    <div class="questions-container">
+        @if (!_questions.Any())
+        {
+            <div class="empty-state">
+                <p>No questions yet. Click <strong>Add Question</strong> to get started.</p>
+            </div>
+        }
+
+        @foreach (var q in _questions)
+        {
+            <div class="question-wrapper">
+                <div class="reorder-controls">
+                    <button class="btn-icon" @onclick="() => MoveUp(q)">▲</button>
+                    <button class="btn-icon" @onclick="() => MoveDown(q)">▼</button>
+                </div>
+                <QuestionEditor Question="q"
+                                OnRemove="() => RemoveQuestion(q)"
+                                OnChanged="StateHasChanged" />
+            </div>
+        }
+    </div>
+
+    <div class="builder-actions">
+        <button class="btn secondary" @onclick="AddQuestion">+ Add Question</button>
+        <button class="btn primary"
+                @onclick="Publish"
+                disabled="@(!_questions.Any())">
+            Publish Survey ▶
+        </button>
+    </div>
+</div>

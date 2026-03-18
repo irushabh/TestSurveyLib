@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SurveyBuilder/SurveyBuilder.csproj" />
+  <Project Path="TestSurvey/TestSurvey.csproj" />
+</Solution>
