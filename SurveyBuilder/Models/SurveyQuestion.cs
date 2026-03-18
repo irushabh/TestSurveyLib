@@ -15,5 +15,6 @@ namespace SurveyBuilder.Models
         public List<string> Options { get; set; } = new(); // For MultipleChoice / Checkbox
         public int MaxRating { get; set; } = 5;            // For Rating
         public int MaxLength { get; set; } = 10;
+        public bool FullWidth { get; set; } = true;
     }
 }

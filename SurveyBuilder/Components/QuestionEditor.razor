@@ -1,5 +1,6 @@
 ﻿@using global::SurveyBuilder.Models
 
+
 <div class="question-card">
     <div class="question-header">
         <input class="question-title-input"
@@ -27,10 +28,16 @@
             <label class="checkbox-label">
                 <input type="number" @bind="Question.MaxLength" /> Max Length
             </label>
-        }        
+        }
+        <label class="checkbox-label">
+            <input type="checkbox"
+                   checked="@(!Question.FullWidth)"
+                   @onchange="e => { Question.FullWidth = !(bool)e.Value!; OnChanged.InvokeAsync(); }" />
+            Half-width (2-col)
+        </label>
     </div>
 
-    @if (Question.Type == QuestionType.MultipleChoice || Question.Type == QuestionType.Checkbox || Question.Type == QuestionType.Dropdown)
+    @if (Question.Type == QuestionType.MultipleChoice || Question.Type == QuestionType.Checkbox)
     {
         <div class="options-section">
             <strong>Options</strong>
@@ -46,7 +53,6 @@
             <div class="add-option">
                 <input @bind="_newOption"
                        @onkeydown="HandleKeyDown"
-                       maxlength="50"
                        placeholder="New option..." />
                 <button class="btn secondary" @onclick="AddOption">Add</button>
             </div>
@@ -61,3 +67,5 @@
         </label>
     }
 </div>
+
+

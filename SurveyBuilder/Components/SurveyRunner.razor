@@ -1,5 +1,6 @@
 ﻿@using global::SurveyBuilder.Models
 
+
 <div class="survey-runner">
     @if (_submitted)
     {
@@ -16,10 +17,10 @@
             <p class="question-count">@Questions.Count question@(Questions.Count != 1 ? "s" : "")</p>
         </div>
 
-        <div class="questions-list">
+        <div class="questions-list questions-grid">
             @foreach (var (q, i) in Questions.Select((q, i) => (q, i)))
             {
-                <div class="runner-question">
+                <div class="runner-question @(q.FullWidth ? "col-full" : "col-half")">
                     <p class="question-label">
                         <span class="q-num">@(i + 1).</span>
                         @q.Text
@@ -34,11 +35,7 @@
                         case QuestionType.Text:
                             <textarea rows="3"
                                       placeholder="Your answer..."
-                                      maxlength="@q.MaxLength"
                                       @onchange="e => SetText(q.Id, e)"></textarea>
-                                      <span class="text-danger">
-                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
-                                      </span>
                             break;
 
                         case QuestionType.MultipleChoice:
@@ -52,26 +49,6 @@
                                     @opt
                                 </label>
                             }
-                            <span class="text-danger">
-                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
-                            </span>
-                            break;
-
-                        case QuestionType.Dropdown:
-                            <select @onchange="e => SetSingle(q.Id, e)" class="form-select">
-                                <option value="">
-                                    [Not Selected]
-                                </option>
-                                @foreach (var opt in q.Options)
-                                {
-                                    <option value="@opt">
-                                        @opt
-                                    </option>
-                                }
-                            </select>        
-                            <span class="text-danger">
-                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
-                            </span>
                             break;
 
                         case QuestionType.Checkbox:
@@ -83,9 +60,6 @@
                                     @opt
                                 </label>
                             }
-                            <span class="text-danger">
-                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
-                            </span>
                             break;
 
                         case QuestionType.Rating:
@@ -99,9 +73,6 @@
                                     </button>
                                 }
                             </div>
-                            <span class="text-danger">
-                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
-                            </span>
                             break;
 
                         case QuestionType.YesNo:
@@ -115,9 +86,6 @@
                                     No
                                 </button>
                             </div>
-                            <span class="text-danger">
-                                @(IsValidAnswer(q) == false ? $"{q.Text} is required." : "")
-                            </span>
                             break;
                     }
                 </div>

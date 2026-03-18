@@ -1,4 +1,5 @@
-﻿<div class="survey-builder">
+﻿
+<div class="survey-builder">
     <div class="builder-header">
         <h2>🛠 Survey Builder</h2>
         <input class="survey-title-input"
@@ -14,18 +15,24 @@
             </div>
         }
 
-        @foreach (var q in Questions)
-        {
-            <div class="question-wrapper">
-                <div class="reorder-controls">
-                    <button class="btn-icon" @onclick="() => MoveUp(q)">▲</button>
-                    <button class="btn-icon" @onclick="() => MoveDown(q)">▼</button>
+        <div class="questions-grid">
+            @foreach (var q in Questions)
+            {
+                <div class="question-wrapper @CardClass(q)"
+                     draggable="true"
+                     @ondragstart="e => OnDragStart(e, q)"
+                     @ondragover:preventDefault="true"
+                     @ondragover="e => OnDragOver(e, q)"
+                     @ondragleave="() => OnDragLeave(q)"
+                     @ondrop="() => OnDrop(q)"
+                     @ondragend="OnDragEnd">
+                    <div class="drag-handle" title="Drag to reorder">⠿</div>
+                    <QuestionEditor Question="q"
+                                    OnRemove="() => RemoveQuestion(q)"
+                                    OnChanged="StateHasChanged" />
                 </div>
-                <QuestionEditor Question="q"
-                                OnRemove="() => RemoveQuestion(q)"
-                                OnChanged="StateHasChanged" />
-            </div>
-        }
+            }
+        </div>
     </div>
 
     <div class="builder-actions">
