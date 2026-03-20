@@ -320,3 +320,29 @@ else
         r.RatingAnswer.HasValue             ? $"{r.RatingAnswer} ★" :
         r.YesNoAnswer.HasValue              ? (r.YesNoAnswer.Value ? "Yes" : "No") : "—";
 }
+
+
+
+
+
+
+
+
+
+
+
+
+ // Overlay any existing answers
+        if (_isEditMode)
+        {
+            foreach (var existing in ExistingResponses!)
+            {
+                if (_responses.TryGetValue(existing.QuestionId, out var slot))
+                {
+                    slot.TextAnswer      = existing.TextAnswer;
+                    slot.SelectedOptions = new List<string>(existing.SelectedOptions);
+                    slot.RatingAnswer    = existing.RatingAnswer;
+                    slot.YesNoAnswer     = existing.YesNoAnswer;
+                }
+            }
+        }
