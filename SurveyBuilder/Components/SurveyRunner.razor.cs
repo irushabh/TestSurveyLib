@@ -18,13 +18,13 @@ namespace SurveyBuilder.Components
         private bool _submitted;
         private string? _validationError;
 
-        protected override void OnParametersSet()
+        protected override Task OnInitializedAsync()
         {
             _responses = Questions.ToDictionary(
-                q => q.Id,
-                q => new SurveyResponse { QuestionId = q.Id });
+             q => q.Id,
+             q => new SurveyResponse { QuestionId = q.Id });
+            return base.OnInitializedAsync();
         }
-
         private void SetText(Guid id, ChangeEventArgs e) =>
             _responses[id].TextAnswer = e.Value?.ToString();
 

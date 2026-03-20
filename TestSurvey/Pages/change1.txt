@@ -1,0 +1,322 @@
+﻿<!-- =========================================================
+     Components/QuestionEditor.razor
+     ========================================================= -->
+@using SurveyLib.Models
+@namespace SurveyLib.Components
+
+<div class="question-card">
+    <div class="question-header">
+        <input class="question-title-input"
+               @bind="Question.Text"
+               @bind:event="oninput"
+               placeholder="Enter question text..." />
+        <button class="btn-icon danger" @onclick="OnRemove">✕</button>
+    </div>
+
+    <div class="question-meta">
+        <label>Type:
+            <select @onchange="OnTypeChanged">
+                @foreach (var qt in Enum.GetValues<QuestionType>())
+                {
+                    <option value="@qt" selected="@(Question.Type == qt)">@qt</option>
+                }
+            </select>
+        </label>
+        <label class="checkbox-label">
+            <input type="checkbox" @bind="Question.IsRequired" /> Required
+        </label>
+        <label class="checkbox-label">
+            <input type="checkbox"
+                   checked="@(!Question.FullWidth)"
+                   @onchange="e => { Question.FullWidth = !(bool)e.Value!; OnChanged.InvokeAsync(); }" />
+            Half-width (2-col)
+        </label>
+    </div>
+
+    @if (Question.Type == QuestionType.MultipleChoice || Question.Type == QuestionType.Checkbox)
+    {
+        <div class="options-section">
+            <strong>Options</strong>
+            <ul class="options-list">
+                @foreach (var opt in Question.Options)
+                {
+                    <li>
+                        <span>@opt</span>
+                        <button class="btn-icon danger small" @onclick="() => RemoveOption(opt)">✕</button>
+                    </li>
+                }
+            </ul>
+            <div class="add-option">
+                <input @bind="_newOption"
+                       @onkeydown="HandleKeyDown"
+                       placeholder="New option..." />
+                <button class="btn secondary" @onclick="AddOption">Add</button>
+            </div>
+        </div>
+    }
+
+    @if (Question.Type == QuestionType.Rating)
+    {
+        <label>Max Stars:
+            <input type="number" min="3" max="10" @bind="Question.MaxRating" style="width:60px" />
+        </label>
+    }
+</div>
+
+<!-- =========================================================
+     Components/SurveyBuilder.razor
+     ========================================================= -->
+@using SurveyLib.Models
+@namespace SurveyLib.Components
+
+<div class="survey-builder">
+    <div class="builder-header">
+        <h2>🛠 Survey Builder</h2>
+        <input class="survey-title-input"
+               @bind="_surveyTitle"
+               placeholder="Survey title..." />
+    </div>
+
+    <div class="questions-container">
+        @if (!_questions.Any())
+        {
+            <div class="empty-state">
+                <p>No questions yet. Click <strong>Add Question</strong> to get started.</p>
+            </div>
+        }
+
+        <div class="questions-grid">
+            @foreach (var q in _questions)
+            {
+                <div class="question-wrapper @CardClass(q)"
+                     draggable="true"
+                     @ondragstart="e => OnDragStart(e, q)"
+                     @ondragover:preventDefault="true"
+                     @ondragover="e => OnDragOver(e, q)"
+                     @ondragleave="() => OnDragLeave(q)"
+                     @ondrop="() => OnDrop(q)"
+                     @ondragend="OnDragEnd">
+                    <div class="drag-handle" title="Drag to reorder">⠿</div>
+                    <QuestionEditor Question="q"
+                                    OnRemove="() => RemoveQuestion(q)"
+                                    OnChanged="StateHasChanged" />
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="builder-actions">
+        <button class="btn secondary" @onclick="AddQuestion">+ Add Question</button>
+        <button class="btn primary"
+                @onclick="Publish"
+                disabled="@(!_questions.Any())">
+            Publish Survey ▶
+        </button>
+    </div>
+</div>
+
+<!-- =========================================================
+     Components/SurveyRunner.razor
+     ========================================================= -->
+@using SurveyLib.Models
+@namespace SurveyLib.Components
+
+<div class="survey-runner">
+    @if (_submitted)
+    {
+        <div class="thank-you">
+            <div class="check-icon">✓</div>
+            <h2>@(_isEditMode ? "Response updated!" : "Thank you!")</h2>
+            <p>@(_isEditMode ? "Your changes have been saved." : "Your response has been recorded.")</p>
+        </div>
+    }
+    else
+    {
+        <div class="runner-header">
+            <h2>@SurveyTitle</h2>
+            <div class="runner-header-meta">
+                <p class="question-count">@Questions.Count question@(Questions.Count != 1 ? "s" : "")</p>
+                @if (_isEditMode)
+                {
+                    <span class="edit-badge">✎ Editing response</span>
+                }
+            </div>
+        </div>
+
+        @if (_isEditMode)
+        {
+            <div class="edit-notice">
+                <span>📋 Your previous answers have been loaded. Make any changes below.</span>
+            </div>
+        }
+
+        <div class="questions-list questions-grid">
+            @foreach (var (q, i) in Questions.Select((q, i) => (q, i)))
+            {
+                <div class="runner-question @(q.FullWidth ? "col-full" : "col-half")">
+                    <p class="question-label">
+                        <span class="q-num">@(i + 1).</span>
+                        @q.Text
+                        @if (q.IsRequired) { <span class="required">*</span> }
+                    </p>
+
+                    @switch (q.Type)
+                    {
+                        case QuestionType.Text:
+                            <textarea rows="3"
+                                      placeholder="Your answer..."
+                                      value="@_responses[q.Id].TextAnswer"
+                                      @onchange="e => SetText(q.Id, e)"></textarea>
+                            break;
+
+                        case QuestionType.MultipleChoice:
+                            @foreach (var opt in q.Options)
+                            {
+                                <label class="radio-label">
+                                    <input type="radio"
+                                           name="@q.Id"
+                                           value="@opt"
+                                           checked="@(_responses[q.Id].SelectedOptions.Contains(opt))"
+                                           @onchange="e => SetSingle(q.Id, e)" />
+                                    @opt
+                                </label>
+                            }
+                            break;
+
+                        case QuestionType.Checkbox:
+                            @foreach (var opt in q.Options)
+                            {
+                                <label class="checkbox-label">
+                                    <input type="checkbox"
+                                           checked="@(_responses[q.Id].SelectedOptions.Contains(opt))"
+                                           @onchange="e => ToggleCheckbox(q.Id, opt, e)" />
+                                    @opt
+                                </label>
+                            }
+                            break;
+
+                        case QuestionType.Rating:
+                            <div class="star-rating">
+                                @for (int s = 1; s <= q.MaxRating; s++)
+                                {
+                                    var star = s;
+                                    <button class="star @(_responses[q.Id].RatingAnswer >= star ? "active" : "")"
+                                            @onclick="() => SetRating(q.Id, star)">★</button>
+                                }
+                            </div>
+                            break;
+
+                        case QuestionType.YesNo:
+                            <div class="yesno-group">
+                                <button class="btn-yesno @(_responses[q.Id].YesNoAnswer == true ? "active" : "")"
+                                        @onclick="() => SetYesNo(q.Id, true)">Yes</button>
+                                <button class="btn-yesno @(_responses[q.Id].YesNoAnswer == false ? "active" : "")"
+                                        @onclick="() => SetYesNo(q.Id, false)">No</button>
+                            </div>
+                            break;
+                    }
+                </div>
+            }
+        </div>
+
+        @if (_validationError is not null)
+        {
+            <p class="validation-error">⚠ @_validationError</p>
+        }
+
+        <div class="runner-footer">
+            @if (_isEditMode && _isDirty)
+            {
+                <button class="btn secondary" @onclick="DiscardChanges">↩ Discard Changes</button>
+            }
+            <button class="btn primary @(_isEditMode ? "" : "full-width")" @onclick="Submit">
+                @(_isEditMode ? (_isDirty ? "💾 Save Changes" : "✓ No Changes") : "Submit Survey")
+            </button>
+        </div>
+    }
+</div>
+
+<!-- =========================================================
+     Usage in a Host App (Pages/Index.razor)
+     ========================================================= -->
+@page "/"
+@using SurveyLib.Components
+@using SurveyLib.Models
+
+<PageTitle>Dynamic Survey</PageTitle>
+
+@if (_questions is null)
+{
+    <SurveyBuilder Title="Customer Feedback" OnSurveyReady="HandleSurveyReady" />
+}
+else if (!_showResults)
+{
+    <SurveyRunner SurveyTitle="@_surveyTitle"
+                  Questions="_questions"
+                  ExistingResponses="_existingResponses"
+                  OnSubmit="HandleSubmit" />
+}
+else
+{
+    <div class="results-panel">
+        <h2>@(_lastWasUpdate ? "✏️ Response Updated" : "📊 Submission Received")</h2>
+        @foreach (var r in _responses!)
+        {
+            var q = _questions.First(x => x.Id == r.QuestionId);
+            <div class="result-item">
+                <strong>@q.Text</strong>
+                <p>@GetAnswerText(r)</p>
+            </div>
+        }
+        <div class="results-actions">
+            <button class="btn secondary" @onclick="EditResponses">✎ Edit Responses</button>
+            <button class="btn primary"   @onclick="Reset">+ New Response</button>
+        </div>
+    </div>
+}
+
+@code {
+    private List<SurveyQuestion>? _questions;
+    private List<SurveyResponse>? _responses;
+    private List<SurveyResponse>? _existingResponses;   // fed back into runner for editing
+    private string _surveyTitle = "";
+    private bool _showResults;
+    private bool _lastWasUpdate;
+
+    private void HandleSurveyReady(List<SurveyQuestion> questions)
+    {
+        _questions    = questions;
+        _surveyTitle  = "Customer Feedback";
+        _showResults  = false;
+    }
+
+    private void HandleSubmit((List<SurveyResponse> Responses, bool IsUpdate) result)
+    {
+        _responses      = result.Responses;
+        _lastWasUpdate  = result.IsUpdate;
+        _showResults    = true;
+        // Persist _responses here (e.g. call your API / EF Core service)
+    }
+
+    /// <summary>Load last saved responses back into the runner for editing.</summary>
+    private void EditResponses()
+    {
+        _existingResponses = _responses;   // pass saved data back to runner
+        _showResults       = false;
+    }
+
+    private void Reset()
+    {
+        _questions         = null;
+        _responses         = null;
+        _existingResponses = null;
+        _showResults       = false;
+        _lastWasUpdate     = false;
+    }
+
+    private string GetAnswerText(SurveyResponse r) =>
+        r.TextAnswer is not null            ? r.TextAnswer :
+        r.SelectedOptions.Any()             ? string.Join(", ", r.SelectedOptions) :
+        r.RatingAnswer.HasValue             ? $"{r.RatingAnswer} ★" :
+        r.YesNoAnswer.HasValue              ? (r.YesNoAnswer.Value ? "Yes" : "No") : "—";
+}
